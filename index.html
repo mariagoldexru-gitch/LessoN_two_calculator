@@ -8,6 +8,43 @@
     <link rel="stylesheet" href="css/landing.css">
     <!-- Тема применяется сразу, чтобы страница не вспыхивала светлой. -->
     <script src="js/theme.js"></script>
+
+    <!-- Курсив включается атрибутом data-font на html. -->
+    <style>
+        html[data-font="italic"] body {
+            font-style: italic;
+        }
+
+        .font-toggle {
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--text);
+            border-radius: 9px;
+            padding: 8px 12px;
+            font-size: 14px;
+            font-weight: 600;
+            font-style: normal;
+            cursor: pointer;
+        }
+
+        .font-toggle:focus-visible {
+            outline: 3px solid var(--primary);
+            outline-offset: 2px;
+        }
+    </style>
+
+    <!-- Восстанавливаем курсив до отрисовки страницы. -->
+    <script>
+        (function applySavedFont() {
+            try {
+                if (localStorage.getItem("family-budget-font") === "italic") {
+                    document.documentElement.setAttribute("data-font", "italic");
+                }
+            } catch (error) {
+                // Если хранилище недоступно, остаётся обычный шрифт.
+            }
+        })();
+    </script>
 </head>
 <body>
 <div class="container">
@@ -20,6 +57,14 @@
         <div class="site-nav-links">
             <a href="index.html" aria-current="page">Главная</a>
             <a href="Калькулятор.html">Калькулятор</a>
+            <!-- Переключение обычного шрифта и курсива -->
+            <button type="button"
+                    class="font-toggle"
+                    id="fontToggle"
+                    aria-pressed="false"
+                    title="Переключить курсив">
+                Курсив
+            </button>
         </div>
     </nav>
 
@@ -157,5 +202,52 @@
     <span class="icon-moon" aria-hidden="true">🌙</span>
     <span class="icon-sun" aria-hidden="true">☀️</span>
 </button>
+
+<!-- =========================================
+     ПЕРЕКЛЮЧЕНИЕ ОБЫЧНОГО ШРИФТА И КУРСИВА
+     ========================================= -->
+<script>
+    (function() {
+        const FONT_STORAGE_KEY = "family-budget-font";
+        const fontToggle = document.getElementById("fontToggle");
+
+        function isItalic() {
+            return document.documentElement.getAttribute("data-font") === "italic";
+        }
+
+        function updateFontButton() {
+            const italic = isItalic();
+
+            fontToggle.textContent = italic ? "Обычный шрифт" : "Курсив";
+            fontToggle.setAttribute("aria-pressed", italic ? "true" : "false");
+            fontToggle.title = italic
+                ? "Вернуть обычный шрифт"
+                : "Включить курсив";
+        }
+
+        function setFont(style) {
+            if (style === "italic") {
+                document.documentElement.setAttribute("data-font", "italic");
+            } else {
+                document.documentElement.removeAttribute("data-font");
+                style = "normal";
+            }
+
+            try {
+                localStorage.setItem(FONT_STORAGE_KEY, style);
+            } catch (error) {
+                // Тема шрифта всё равно меняется до перезагрузки.
+            }
+
+            updateFontButton();
+        }
+
+        fontToggle.addEventListener("click", function() {
+            setFont(isItalic() ? "normal" : "italic");
+        });
+
+        updateFontButton();
+    })();
+</script>
 </body>
 </html>
