@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Семейный бюджет — учёт доходов и расходов</title>
+    <meta name="description" content="Простой калькулятор семейного бюджета: доходы, расходы, накопления, рекомендации и экспорт в CSV. Данные хранятся только в вашем браузере.">
+    <link rel="stylesheet" href="css/landing.css">
+    <!-- Тема применяется сразу, чтобы страница не вспыхивала светлой. -->
+    <script src="js/theme.js"></script>
+</head>
+<body>
+<div class="container">
+
+    <!-- =========================================
+         НАВИГАЦИЯ САЙТА
+         ========================================= -->
+    <nav class="site-nav" aria-label="Основная навигация">
+        <a class="logo" href="index.html">Семейный бюджет</a>
+        <div class="site-nav-links">
+            <a href="index.html" aria-current="page">Главная</a>
+            <a href="Калькулятор.html">Калькулятор</a>
+        </div>
+    </nav>
+
+    <!-- =========================================
+         ПРИВЕТСТВЕННЫЙ БЛОК
+         ========================================= -->
+    <section class="hero">
+        <div>
+            <h1>Семейные финансы без таблиц и сложных сервисов</h1>
+            <p>
+                Ведите доходы и расходы по месяцам, смотрите остаток и норму
+                сбережений, получайте подсказки и выгружайте данные в CSV.
+                Всё работает прямо в браузере.
+            </p>
+            <div class="hero-actions">
+                <!-- Основной переход к рабочему калькулятору -->
+                <a class="button button-primary" href="Калькулятор.html">
+                    Открыть калькулятор
+                </a>
+                <a class="button button-light" href="#features">
+                    Что умеет сервис
+                </a>
+            </div>
+        </div>
+
+        <!-- Демонстрационные цифры — только для лендинга, не из данных пользователя -->
+        <div class="hero-preview" aria-hidden="true">
+            <div class="preview-row">
+                <div class="card stat income">
+                    <div class="stat-label">Доходы</div>
+                    <div class="stat-value">186 400 ₽</div>
+                </div>
+                <div class="card stat expenses">
+                    <div class="stat-label">Расходы</div>
+                    <div class="stat-value">142 750 ₽</div>
+                </div>
+            </div>
+            <div class="preview-row">
+                <div class="card stat">
+                    <div class="stat-label">Остаток</div>
+                    <div class="stat-value">43 650 ₽</div>
+                </div>
+                <div class="card stat savings">
+                    <div class="stat-label">Накопления</div>
+                    <div class="stat-value">18%</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================
+         ВОЗМОЖНОСТИ
+         ========================================= -->
+    <h2 class="section-title" id="features">Что можно делать</h2>
+    <p class="section-caption">
+        Тот же калькулятор, которым вы уже пользуетесь, собран в небольшой сайт.
+    </p>
+
+    <section class="features">
+        <article class="card">
+            <h3>Доходы и расходы</h3>
+            <p>Добавляйте поступления и траты по категориям, членам семьи и типу расхода.</p>
+        </article>
+        <article class="card">
+            <h3>Итоги месяца</h3>
+            <p>Сразу видно общий доход, расходы, остаток и долю накоплений.</p>
+        </article>
+        <article class="card">
+            <h3>Рекомендации</h3>
+            <p>Сервис подсказывает, если обязательные траты или кредиты занимают слишком много.</p>
+        </article>
+        <article class="card">
+            <h3>Цель накоплений</h3>
+            <p>Посчитайте, сколько откладывать каждый месяц, чтобы выйти на нужную сумму.</p>
+        </article>
+        <article class="card">
+            <h3>Экспорт в CSV</h3>
+            <p>Выгрузите месяц в таблицу и откройте файл в Excel.</p>
+        </article>
+        <article class="card">
+            <h3>Светлая и тёмная тема</h3>
+            <p>Переключайте оформление кнопкой в правом нижнем углу — выбор запоминается.</p>
+        </article>
+    </section>
+
+    <!-- =========================================
+         КАК НАЧАТЬ
+         ========================================= -->
+    <h2 class="section-title">Как начать</h2>
+    <p class="section-caption">Три шага — и бюджет уже на экране.</p>
+
+    <section class="steps">
+        <article class="card">
+            <div class="step-number">1</div>
+            <h3>Откройте калькулятор</h3>
+            <p class="section-caption" style="margin:0">Никакой регистрации: страница работает локально в браузере.</p>
+        </article>
+        <article class="card">
+            <div class="step-number">2</div>
+            <h3>Выберите месяц</h3>
+            <p class="section-caption" style="margin:0">У каждого месяца свой список доходов и расходов.</p>
+        </article>
+        <article class="card">
+            <div class="step-number">3</div>
+            <h3>Вносите операции</h3>
+            <p class="section-caption" style="margin:0">Итоги, графики и советы пересчитываются автоматически.</p>
+        </article>
+    </section>
+
+    <!-- =========================================
+         ПРИВАТНОСТЬ
+         ========================================= -->
+    <section class="card privacy">
+        <h2 class="section-title">Данные остаются у вас</h2>
+        <p class="section-caption" style="margin-bottom:0">
+            Бюджет сохраняется в локальном хранилище этого браузера.
+            Сервер и облачная база не используются. Если очистить данные сайта,
+            записи месяца тоже исчезнут — при необходимости сделайте экспорт в CSV.
+        </p>
+    </section>
+
+    <footer class="footer">
+        Калькулятор семейного бюджета · Учебный проект · Данные хранятся в браузере
+    </footer>
+</div>
+
+<!-- =========================================
+     КНОПКА ТЕМЫ (правый нижний угол)
+     ========================================= -->
+<button type="button"
+        class="theme-toggle"
+        id="themeToggle"
+        aria-label="Переключить тему"
+        title="Переключить тему">
+    <span class="icon-moon" aria-hidden="true">🌙</span>
+    <span class="icon-sun" aria-hidden="true">☀️</span>
+</button>
+</body>
+</html>

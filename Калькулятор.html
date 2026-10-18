@@ -1,0 +1,2063 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор семейного бюджета</title>
+
+    <style>
+        /* =========================================
+           1. ОСНОВНЫЕ НАСТРОЙКИ И ЦВЕТОВАЯ ПАЛИТРА
+           ========================================= */
+
+        :root {
+            --bg: #f4f6f8;
+            --card: #ffffff;
+            --text: #253044;
+            --muted: #778196;
+            --label: #586277;
+            --primary: #4263eb;
+            --primary-light: #edf1ff;
+            --green: #16845b;
+            --green-light: #e6f7ef;
+            --red: #d94343;
+            --red-light: #fff0f0;
+            --orange: #c17b16;
+            --border: #e4e8ef;
+            --input-bg: #ffffff;
+            --button-light-bg: #f0f2f6;
+            --table-row-border: #edf0f4;
+            --progress-bg: #edf0f5;
+            --advice-info-bg: #f3f5ff;
+            --advice-warning-bg: #fff5e5;
+            --goal-bg: #faf9ff;
+            --goal-border: #e8e1ff;
+            --theme-btn-bg: #253044;
+            --theme-btn-color: #ffffff;
+            --radius: 16px;
+            --shadow: 0 5px 20px rgba(25, 40, 70, 0.05);
+            color-scheme: light;
+        }
+
+        /* Тёмная тема: те же имена переменных, другие значения */
+        html[data-theme="dark"] {
+            --bg: #121826;
+            --card: #1b2435;
+            --text: #e8edf5;
+            --muted: #9aa6b8;
+            --label: #b4c0d4;
+            --primary: #6b86f5;
+            --primary-light: #2a3458;
+            --green: #3dba86;
+            --green-light: #163528;
+            --red: #f07171;
+            --red-light: #3a1f24;
+            --orange: #e0a454;
+            --border: #2d3a4f;
+            --input-bg: #151d2c;
+            --button-light-bg: #2a3548;
+            --table-row-border: #2d3a4f;
+            --progress-bg: #2a3548;
+            --advice-info-bg: #232d4a;
+            --advice-warning-bg: #3a2f1c;
+            --goal-bg: #221f38;
+            --goal-border: #3d3563;
+            --theme-btn-bg: #e8edf5;
+            --theme-btn-color: #121826;
+            --shadow: 0 5px 20px rgba(0, 0, 0, 0.35);
+            color-scheme: dark;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 24px;
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+
+        button, input, select {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        .container {
+            max-width: 1180px;
+            margin: 0 auto;
+        }
+
+        .site-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .site-nav-links {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .site-nav-links a {
+            text-decoration: none;
+            color: var(--muted);
+            font-size: 14px;
+            font-weight: 600;
+            padding: 8px 12px;
+            border-radius: 9px;
+            border: 1px solid transparent;
+        }
+
+        .site-nav-links a:hover,
+        .site-nav-links a[aria-current="page"] {
+            color: var(--text);
+            background: var(--card);
+            border: 1px solid var(--border);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            font-size: clamp(25px, 4vw, 34px);
+            margin: 0 0 6px;
+        }
+
+        h2 {
+            font-size: 19px;
+            margin: 0 0 18px;
+        }
+
+        h3 {
+            font-size: 15px;
+            margin: 0 0 12px;
+        }
+
+        p {
+            margin-top: 0;
+        }
+
+        .subtitle, .muted {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .month-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--card);
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .month-control input {
+            border: none;
+            background: transparent;
+            outline: none;
+            color: var(--text);
+        }
+
+        /* =========================================
+           2. КАРТОЧКИ И ОСНОВНАЯ СЕТКА
+           ========================================= */
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 22px;
+            box-shadow: var(--shadow);
+            min-width: 0;
+        }
+
+        .summary-card {
+            border-top: 4px solid var(--primary);
+        }
+
+        .summary-card.income {
+            border-top-color: var(--green);
+        }
+
+        .summary-card.expenses {
+            border-top-color: var(--red);
+        }
+
+        .summary-card.savings {
+            border-top-color: #8b5cf6;
+        }
+
+        .summary-label {
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .summary-value {
+            font-size: clamp(20px, 2.2vw, 28px);
+            font-weight: 700;
+            overflow-wrap: anywhere;
+        }
+
+        .summary-note {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 8px;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+            gap: 20px;
+            align-items: start;
+        }
+
+        .column {
+            display: grid;
+            gap: 20px;
+            min-width: 0;
+        }
+
+        /* =========================================
+           3. ФОРМЫ И КНОПКИ
+           ========================================= */
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 0;
+        }
+
+        .field.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--label);
+        }
+
+        input, select {
+            width: 100%;
+            min-width: 0;
+            padding: 11px 12px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            background: var(--input-bg);
+            color: var(--text);
+        }
+
+        input:focus, select:focus {
+            outline: 2px solid rgba(66, 99, 235, 0.2);
+            border-color: var(--primary);
+        }
+
+        .button {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            border: none;
+            border-radius: 9px;
+            padding: 11px 15px;
+            font-weight: 600;
+            font-size: 13px;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        .button:hover {
+            opacity: 0.88;
+        }
+
+        .button:active {
+            transform: scale(0.98);
+        }
+
+        .button-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .button-green {
+            background: var(--green-light);
+            color: var(--green);
+        }
+
+        .button-light {
+            background: var(--button-light-bg);
+            color: var(--text);
+        }
+
+        .button-danger {
+            background: var(--red-light);
+            color: var(--red);
+        }
+
+        .button-small {
+            padding: 7px 10px;
+            font-size: 12px;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* =========================================
+           4. ТАБЛИЦЫ ОПЕРАЦИЙ
+           ========================================= */
+
+        .table-wrapper {
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th {
+            text-align: left;
+            color: var(--muted);
+            font-weight: 600;
+            font-size: 12px;
+            padding: 10px 8px;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px 8px;
+            border-bottom: 1px solid var(--table-row-border);
+            vertical-align: middle;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .amount {
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .income-text {
+            color: var(--green);
+        }
+
+        .expense-text {
+            color: var(--red);
+        }
+
+        .delete-button {
+            border: none;
+            background: transparent;
+            color: var(--red);
+            font-size: 20px;
+            line-height: 1;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        .delete-button:hover {
+            background: var(--red-light);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--muted);
+            padding: 22px 8px;
+            font-size: 13px;
+        }
+
+        /* =========================================
+           5. АНАЛИТИКА И ПРОГРЕСС-БАРЫ
+           ========================================= */
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 13px;
+            margin: 15px 0 7px;
+        }
+
+        .metric-row strong {
+            text-align: right;
+        }
+
+        .progress {
+            height: 9px;
+            background: var(--progress-bg);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            border-radius: inherit;
+            transition: width 0.25s;
+        }
+
+        .bar-green {
+            background: var(--green);
+        }
+
+        .bar-red {
+            background: var(--red);
+        }
+
+        .bar-blue {
+            background: var(--primary);
+        }
+
+        .bar-purple {
+            background: #8b5cf6;
+        }
+
+        .category-item {
+            margin-bottom: 17px;
+        }
+
+        .category-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .category-heading {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 13px;
+            margin-bottom: 7px;
+        }
+
+        .category-heading span:last-child {
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        /* =========================================
+           6. БЛОК РЕКОМЕНДАЦИЙ
+           ========================================= */
+
+        .advice {
+            padding: 15px;
+            border-radius: 10px;
+            background: var(--advice-info-bg);
+            border-left: 4px solid var(--primary);
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .advice:last-child {
+            margin-bottom: 0;
+        }
+
+        .advice.good {
+            background: var(--green-light);
+            border-left-color: var(--green);
+        }
+
+        .advice.warning {
+            background: var(--advice-warning-bg);
+            border-left-color: var(--orange);
+        }
+
+        .advice.bad {
+            background: var(--red-light);
+            border-left-color: var(--red);
+        }
+
+        /* =========================================
+           7. ПЛАН НАКОПЛЕНИЙ
+           ========================================= */
+
+        .goal-box {
+            background: var(--goal-bg);
+            border: 1px solid var(--goal-border);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .goal-result {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 10px 0 5px;
+        }
+
+        /* =========================================
+           8. ПОДВАЛ И АДАПТИВНОСТЬ
+           ========================================= */
+
+        .footer {
+            text-align: center;
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 25px;
+            padding-bottom: 10px;
+        }
+
+        .section-caption {
+            font-size: 13px;
+            color: var(--muted);
+            margin: -8px 0 17px;
+        }
+
+        @media (max-width: 900px) {
+            .summary-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 520px) {
+            body {
+                padding: 12px;
+            }
+
+            .card {
+                padding: 16px;
+            }
+
+            .summary-grid {
+                gap: 10px;
+            }
+
+            .summary-card {
+                padding: 14px;
+            }
+
+            .summary-value {
+                font-size: 20px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .field.full {
+                grid-column: auto;
+            }
+
+            header {
+                align-items: stretch;
+            }
+
+            .month-control {
+                justify-content: space-between;
+            }
+        }
+
+        /* =========================================
+           9. КНОПКА ПЕРЕКЛЮЧЕНИЯ ТЕМЫ
+           ========================================= */
+
+        .theme-toggle {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            z-index: 1000;
+            width: 56px;
+            height: 56px;
+            border: none;
+            border-radius: 50%;
+            background: var(--theme-btn-bg);
+            color: var(--theme-btn-color);
+            box-shadow: 0 8px 24px rgba(25, 40, 70, 0.22);
+            font-size: 22px;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, opacity 0.2s, background-color 0.25s;
+        }
+
+        .theme-toggle:hover {
+            opacity: 0.92;
+            transform: scale(1.05);
+        }
+
+        .theme-toggle:focus-visible {
+            outline: 3px solid var(--primary);
+            outline-offset: 3px;
+        }
+
+        /* В тёмной теме на кнопке показываем солнце, в светлой — луну */
+        .theme-toggle .icon-sun {
+            display: none;
+        }
+
+        html[data-theme="dark"] .theme-toggle .icon-moon {
+            display: none;
+        }
+
+        html[data-theme="dark"] .theme-toggle .icon-sun {
+            display: inline;
+        }
+
+        @media (max-width: 520px) {
+            .theme-toggle {
+                right: 16px;
+                bottom: 16px;
+                width: 50px;
+                height: 50px;
+            }
+        }
+    </style>
+
+    <!-- Общая тема для лендинга и калькулятора. -->
+    <script src="js/theme.js"></script>
+</head>
+
+<body>
+<div class="container">
+
+    <!-- =========================================
+         НАВИГАЦИЯ САЙТА
+         ========================================= -->
+    <nav class="site-nav" aria-label="Основная навигация">
+        <a class="logo" href="index.html">Семейный бюджет</a>
+        <div class="site-nav-links">
+            <a href="index.html">Главная</a>
+            <a href="Калькулятор.html" aria-current="page">Калькулятор</a>
+        </div>
+    </nav>
+
+    <!-- =========================================
+         ЗАГОЛОВОК И ВЫБОР МЕСЯЦА
+         ========================================= -->
+
+    <header>
+        <div>
+            <h1>Семейный бюджет</h1>
+            <div class="subtitle">
+                Контролируйте доходы, расходы и накопления в одном месте
+            </div>
+        </div>
+
+        <div class="month-control">
+            <label for="budgetMonth">Месяц:</label>
+            <input type="month" id="budgetMonth">
+        </div>
+    </header>
+
+    <!-- =========================================
+         КАРТОЧКИ ИТОГОВ
+         ========================================= -->
+
+    <section class="summary-grid" aria-label="Итоги бюджета">
+
+        <div class="card summary-card income">
+            <div class="summary-label">Общий доход</div>
+            <div class="summary-value income-text" id="totalIncome">0 ₽</div>
+            <div class="summary-note">Все источники дохода</div>
+        </div>
+
+        <div class="card summary-card expenses">
+            <div class="summary-label">Все расходы</div>
+            <div class="summary-value expense-text" id="totalExpenses">0 ₽</div>
+            <div class="summary-note">Включая накопления и кредиты</div>
+        </div>
+
+        <div class="card summary-card">
+            <div class="summary-label">Остаток средств</div>
+            <div class="summary-value" id="balance">0 ₽</div>
+            <div class="summary-note">Доходы минус все расходы</div>
+        </div>
+
+        <div class="card summary-card savings">
+            <div class="summary-label">Норма сбережений</div>
+            <div class="summary-value" id="savingsRate">0%</div>
+            <div class="summary-note">Накопления от дохода</div>
+        </div>
+
+    </section>
+
+    <main class="layout">
+
+        <!-- =====================================
+             ЛЕВАЯ КОЛОНКА: ВВОД ДАННЫХ
+             ===================================== -->
+
+        <div class="column">
+
+            <!-- Добавление дохода -->
+
+            <section class="card">
+                <h2>Доходы семьи</h2>
+                <p class="section-caption">
+                    Зарплата, подработка, пособия, аренда и другие поступления.
+                </p>
+
+                <form id="incomeForm">
+                    <div class="form-grid">
+
+                        <div class="field">
+                            <label for="incomeName">Источник дохода</label>
+                            <input id="incomeName" type="text"
+                                   placeholder="Например, зарплата"
+                                   maxlength="100" required>
+                        </div>
+
+                        <div class="field">
+                            <label for="incomeAmount">Сумма, ₽</label>
+                            <input id="incomeAmount" type="number"
+                                   min="0.01" max="1000000000000"
+                                   step="0.01" placeholder="80000"
+                                   required>
+                        </div>
+
+                        <div class="field full">
+                            <label for="incomePerson">Кто получает</label>
+                            <select id="incomePerson">
+                                <option value="Общий доход семьи">Общий доход семьи</option>
+                                <option value="Первый член семьи">Первый член семьи</option>
+                                <option value="Второй член семьи">Второй член семьи</option>
+                                <option value="Другой источник">Другой источник</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <button class="button button-primary" type="submit">
+                        + Добавить доход
+                    </button>
+                </form>
+
+                <div class="table-wrapper" style="margin-top:18px">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Источник</th>
+                            <th>Получатель</th>
+                            <th>Сумма</th>
+                            <th>Удалить</th>
+                        </tr>
+                        </thead>
+                        <tbody id="incomeTable"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Добавление расхода -->
+
+            <section class="card">
+                <h2>Расходы семьи</h2>
+                <p class="section-caption">
+                    Указывайте фактические суммы расходов за выбранный месяц.
+                </p>
+
+                <form id="expenseForm">
+                    <div class="form-grid">
+
+                        <div class="field">
+                            <label for="expenseName">Название расхода</label>
+                            <input id="expenseName" type="text"
+                                   placeholder="Например, продукты"
+                                   maxlength="100" required>
+                        </div>
+
+                        <div class="field">
+                            <label for="expenseAmount">Сумма, ₽</label>
+                            <input id="expenseAmount" type="number"
+                                   min="0.01" max="1000000000000"
+                                   step="0.01" placeholder="15000"
+                                   required>
+                        </div>
+
+                        <div class="field">
+                            <label for="expenseCategory">Категория</label>
+                            <select id="expenseCategory">
+                                <option value="Продукты">Продукты</option>
+                                <option value="Жильё и коммунальные услуги">Жильё и коммунальные услуги</option>
+                                <option value="Транспорт">Транспорт</option>
+                                <option value="Здоровье">Здоровье</option>
+                                <option value="Образование">Образование</option>
+                                <option value="Дети">Дети</option>
+                                <option value="Одежда">Одежда</option>
+                                <option value="Связь и интернет">Связь и интернет</option>
+                                <option value="Отдых и развлечения">Отдых и развлечения</option>
+                                <option value="Кредиты">Кредиты</option>
+                                <option value="Накопления">Накопления</option>
+                                <option value="Дом и быт">Дом и быт</option>
+                                <option value="Налоги">Налоги</option>
+                                <option value="Подарки и помощь">Подарки и помощь</option>
+                                <option value="Прочее">Прочее</option>
+                            </select>
+                        </div>
+
+                        <div class="field">
+                            <label for="expenseType">Тип расхода</label>
+                            <select id="expenseType">
+                                <option value="Обязательный">Обязательный</option>
+                                <option value="Переменный">Переменный</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <button class="button button-primary" type="submit">
+                        + Добавить расход
+                    </button>
+                </form>
+
+                <div class="table-wrapper" style="margin-top:18px">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Расход</th>
+                            <th>Категория</th>
+                            <th>Сумма</th>
+                            <th>Удалить</th>
+                        </tr>
+                        </thead>
+                        <tbody id="expenseTable"></tbody>
+                    </table>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- =====================================
+             ПРАВАЯ КОЛОНКА: АНАЛИТИКА
+             ===================================== -->
+
+        <div class="column">
+
+            <!-- Финансовая сводка -->
+
+            <section class="card">
+                <h2>Финансовая картина</h2>
+
+                <div class="metric-row">
+                    <span>Доля расходов в доходе</span>
+                    <strong id="expenseRatio">0%</strong>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar bar-red" id="expenseBar"></div>
+                </div>
+
+                <div class="metric-row">
+                    <span>Доля обязательных расходов</span>
+                    <strong id="mandatoryRatio">0%</strong>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar bar-blue" id="mandatoryBar"></div>
+                </div>
+
+                <div class="metric-row">
+                    <span>Накопления</span>
+                    <strong id="savingsAmount">0 ₽</strong>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar bar-purple" id="savingsBar"></div>
+                </div>
+
+                <div class="metric-row">
+                    <span>Платежи по кредитам</span>
+                    <strong id="creditAmount">0 ₽</strong>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar bar-red" id="creditBar"></div>
+                </div>
+            </section>
+
+            <!-- Структура расходов -->
+
+            <section class="card">
+                <h2>Структура расходов</h2>
+                <p class="section-caption">
+                    Категории отсортированы по сумме от большей к меньшей.
+                </p>
+                <div id="categoryAnalysis">
+                    <div class="empty-state">Добавьте расходы для анализа.</div>
+                </div>
+            </section>
+
+            <!-- Финансовые рекомендации -->
+
+            <section class="card">
+                <h2>Финансовые рекомендации</h2>
+                <div id="recommendations">
+                    <div class="advice">
+                        Добавьте доходы и расходы, чтобы получить рекомендации.
+                    </div>
+                </div>
+            </section>
+
+            <!-- Цель накоплений -->
+
+            <section class="card">
+                <h2>Цель накоплений</h2>
+
+                <div class="goal-box">
+                    <div class="field">
+                        <label for="goalAmount">Сколько нужно накопить, ₽</label>
+                        <input id="goalAmount" type="number"
+                               min="0" max="1000000000000"
+                               step="0.01" placeholder="300000">
+                    </div>
+
+                    <div class="field" style="margin-top:12px">
+                        <label for="goalMonths">Срок накопления, месяцев</label>
+                        <input id="goalMonths" type="number"
+                               min="1" max="1200" step="1"
+                               placeholder="12">
+                    </div>
+
+                    <div class="goal-result" id="goalMonthly">0 ₽/мес.</div>
+                    <div class="muted" id="goalAdvice">
+                        Укажите цель и срок накопления.
+                    </div>
+                </div>
+            </section>
+
+            <!-- Управление данными -->
+
+            <section class="card">
+                <h2>Данные бюджета</h2>
+                <p class="section-caption">
+                    Данные сохраняются в локальном хранилище этого браузера.
+                </p>
+
+                <div class="button-row">
+                    <button type="button" class="button button-green"
+                            id="exportButton">
+                        Экспорт в CSV
+                    </button>
+
+                    <button type="button" class="button button-light"
+                            id="demoButton">
+                        Загрузить пример
+                    </button>
+
+                    <button type="button" class="button button-danger"
+                            id="clearButton">
+                        Очистить месяц
+                    </button>
+                </div>
+
+                <p class="muted" id="saveStatus" style="margin-top:14px">
+                    Изменения сохраняются автоматически.
+                </p>
+            </section>
+
+        </div>
+    </main>
+
+    <footer class="footer">
+        Калькулятор семейного бюджета · Все суммы в рублях ·
+        Данные хранятся в вашем браузере
+    </footer>
+
+</div>
+
+<!-- =========================================
+     КНОПКА ТЕМЫ (правый нижний угол)
+     Светлая тема: луна — переключить на тёмную.
+     Тёмная тема: солнце — вернуть светлую.
+     ========================================= -->
+<button type="button"
+        class="theme-toggle"
+        id="themeToggle"
+        aria-label="Переключить тему"
+        title="Переключить тему">
+    <span class="icon-moon" aria-hidden="true">🌙</span>
+    <span class="icon-sun" aria-hidden="true">☀️</span>
+</button>
+
+<script>
+/* =========================================================
+   КАЛЬКУЛЯТОР СЕМЕЙНОГО БЮДЖЕТА
+   Версия 1.0
+
+   Основные функции:
+   1. Добавление и удаление доходов.
+   2. Добавление и удаление расходов.
+   3. Автоматический пересчёт показателей.
+   4. Анализ категорий и финансовые рекомендации.
+   5. Расчёт цели накоплений.
+   6. Сохранение данных в localStorage.
+   7. Экспорт данных в CSV.
+   8. Переключение светлой и тёмной темы (js/theme.js).
+
+   ВАЖНО:
+   - Данные хранятся в браузере на этом устройстве.
+   - Сервер и база данных не используются.
+   - Очистка данных браузера может удалить сохранённый бюджет.
+   ========================================================= */
+
+
+/* =========================================================
+   1. ПЕРЕМЕННЫЕ И НАСТРОЙКИ
+   ========================================================= */
+
+// Список операций хранится отдельно для каждого месяца.
+let incomes = [];
+let expenses = [];
+
+// Текущий месяц в формате YYYY-MM.
+const monthInput = document.getElementById("budgetMonth");
+
+// Форматирование денежных сумм в российских рублях.
+const moneyFormatter = new Intl.NumberFormat("ru-RU", {
+    style: "currency",
+    currency: "RUB",
+    maximumFractionDigits: 2
+});
+
+// Форматирование процентов.
+const percentFormatter = new Intl.NumberFormat("ru-RU", {
+    maximumFractionDigits: 1
+});
+
+// Допустимый максимум для одной введённой суммы.
+const MAX_AMOUNT = 1_000_000_000_000;
+
+// Ключи localStorage имеют общий префикс.
+const STORAGE_PREFIX = "familyBudget_v1_";
+
+
+/* =========================================================
+   2. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+   ========================================================= */
+
+// Преобразование числа в денежный формат.
+function formatMoney(value) {
+    return moneyFormatter.format(value);
+}
+
+// Преобразование числа в проценты.
+function formatPercent(value) {
+    return percentFormatter.format(value) + "%";
+}
+
+// Безопасное получение элемента по ID.
+function el(id) {
+    return document.getElementById(id);
+}
+
+// Получение ключа хранилища для выбранного месяца.
+function getStorageKey() {
+    return STORAGE_PREFIX + monthInput.value;
+}
+
+// Возвращает число из поля ввода.
+// Пустое поле преобразуется в 0.
+function getNumber(id) {
+    const value = Number(el(id).value);
+    return Number.isFinite(value) ? value : 0;
+}
+
+// Проверяет денежную сумму.
+function isValidAmount(value) {
+    return Number.isFinite(value) &&
+        value > 0 &&
+        value <= MAX_AMOUNT;
+}
+
+// Защита от вставки HTML из пользовательских названий.
+// Все пользовательские текстовые значения выводятся через textContent.
+function makeTextCell(value, className = "") {
+    const td = document.createElement("td");
+    td.textContent = value;
+
+    if (className) {
+        td.className = className;
+    }
+
+    return td;
+}
+
+// Создание кнопки удаления операции.
+function makeDeleteButton(onClick, label) {
+    const button = document.createElement("button");
+
+    button.type = "button";
+    button.className = "delete-button";
+    button.textContent = "×";
+    button.title = label;
+    button.setAttribute("aria-label", label);
+    button.addEventListener("click", onClick);
+
+    const td = document.createElement("td");
+    td.appendChild(button);
+
+    return td;
+}
+
+// Ограничивает ширину прогресс-бара значением 100%.
+function setProgress(id, percentage) {
+    el(id).style.width =
+        Math.max(0, Math.min(100, percentage)) + "%";
+}
+
+// Выводит статус сохранения.
+function setSaveStatus(message) {
+    el("saveStatus").textContent = message;
+}
+
+// Получение текущей даты в формате YYYY-MM.
+// Используется локальная дата устройства.
+function getCurrentMonth() {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+
+    return year + "-" + month;
+}
+
+// Округление денежной суммы до копеек.
+function roundMoney(value) {
+    return Math.round((value + Number.EPSILON) * 100) / 100;
+}
+
+
+/* =========================================================
+   3. СОХРАНЕНИЕ И ЗАГРУЗКА
+   ========================================================= */
+
+// Сохранение текущего месяца в localStorage.
+function saveData() {
+    try {
+        const data = {
+            incomes: incomes,
+            expenses: expenses,
+            goalAmount: el("goalAmount").value,
+            goalMonths: el("goalMonths").value
+        };
+
+        localStorage.setItem(
+            getStorageKey(),
+            JSON.stringify(data)
+        );
+
+        setSaveStatus("Сохранено автоматически.");
+    } catch (error) {
+        console.error("Ошибка сохранения бюджета:", error);
+
+        setSaveStatus(
+            "Не удалось сохранить данные. Проверьте настройки браузера."
+        );
+    }
+}
+
+// Проверяет загруженные операции перед использованием.
+function validateOperations(items, type) {
+    if (!Array.isArray(items)) {
+        return [];
+    }
+
+    return items.filter(item => {
+        if (!item || typeof item !== "object") {
+            return false;
+        }
+
+        return typeof item.id === "string" &&
+            typeof item.name === "string" &&
+            item.name.length > 0 &&
+            typeof item.amount === "number" &&
+            isValidAmount(item.amount) &&
+            (
+                type === "income"
+                    ? typeof item.person === "string"
+                    : typeof item.category === "string" &&
+                      typeof item.expenseType === "string"
+            );
+    }).map(item => {
+        if (type === "income") {
+            return {
+                id: item.id,
+                name: item.name.slice(0, 100),
+                amount: item.amount,
+                person: item.person.slice(0, 100)
+            };
+        }
+
+        return {
+            id: item.id,
+            name: item.name.slice(0, 100),
+            amount: item.amount,
+            category: item.category.slice(0, 100),
+            expenseType: item.expenseType === "Обязательный"
+                ? "Обязательный"
+                : "Переменный"
+        };
+    });
+}
+
+// Загрузка данных выбранного месяца.
+function loadData() {
+    incomes = [];
+    expenses = [];
+
+    el("goalAmount").value = "";
+    el("goalMonths").value = "";
+
+    try {
+        const raw = localStorage.getItem(getStorageKey());
+
+        if (raw) {
+            const data = JSON.parse(raw);
+
+            incomes = validateOperations(data.incomes, "income");
+            expenses = validateOperations(data.expenses, "expense");
+
+            if (
+                data.goalAmount !== undefined &&
+                data.goalAmount !== null
+            ) {
+                el("goalAmount").value = data.goalAmount;
+            }
+
+            if (
+                data.goalMonths !== undefined &&
+                data.goalMonths !== null
+            ) {
+                el("goalMonths").value = data.goalMonths;
+            }
+        }
+
+        setSaveStatus("Данные текущего месяца загружены.");
+    } catch (error) {
+        console.error("Ошибка загрузки бюджета:", error);
+
+        incomes = [];
+        expenses = [];
+
+        setSaveStatus(
+            "Не удалось прочитать сохранённые данные."
+        );
+    }
+
+    render();
+}
+
+
+/* =========================================================
+   4. ДОБАВЛЕНИЕ ДОХОДОВ
+   ========================================================= */
+
+el("incomeForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const name = el("incomeName").value.trim();
+    const amount = roundMoney(getNumber("incomeAmount"));
+    const person = el("incomePerson").value;
+
+    if (!name) {
+        alert("Введите название источника дохода.");
+        return;
+    }
+
+    if (!isValidAmount(amount)) {
+        alert("Введите сумму больше нуля и не более 1 трлн рублей.");
+        return;
+    }
+
+    incomes.push({
+        id: createId(),
+        name: name,
+        amount: amount,
+        person: person
+    });
+
+    this.reset();
+
+    render();
+});
+
+
+/* =========================================================
+   5. ДОБАВЛЕНИЕ РАСХОДОВ
+   ========================================================= */
+
+el("expenseForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const name = el("expenseName").value.trim();
+    const amount = roundMoney(getNumber("expenseAmount"));
+    const category = el("expenseCategory").value;
+    const expenseType = el("expenseType").value;
+
+    if (!name) {
+        alert("Введите название расхода.");
+        return;
+    }
+
+    if (!isValidAmount(amount)) {
+        alert("Введите сумму больше нуля и не более 1 трлн рублей.");
+        return;
+    }
+
+    expenses.push({
+        id: createId(),
+        name: name,
+        amount: amount,
+        category: category,
+        expenseType: expenseType
+    });
+
+    this.reset();
+
+    render();
+});
+
+
+/* =========================================================
+   6. ИДЕНТИФИКАТОРЫ ОПЕРАЦИЙ
+   ========================================================= */
+
+// Генерирует уникальный идентификатор для операции.
+function createId() {
+    if (
+        typeof crypto !== "undefined" &&
+        typeof crypto.randomUUID === "function"
+    ) {
+        return crypto.randomUUID();
+    }
+
+    return Date.now().toString(36) +
+        Math.random().toString(36).slice(2);
+}
+
+
+/* =========================================================
+   7. УДАЛЕНИЕ ОПЕРАЦИЙ
+   ========================================================= */
+
+function deleteIncome(id) {
+    incomes = incomes.filter(item => item.id !== id);
+    render();
+}
+
+function deleteExpense(id) {
+    expenses = expenses.filter(item => item.id !== id);
+    render();
+}
+
+
+/* =========================================================
+   8. РАСЧЁТ ФИНАНСОВЫХ ПОКАЗАТЕЛЕЙ
+   ========================================================= */
+
+function calculate() {
+    // Суммарный доход семьи.
+    const totalIncome = incomes.reduce(
+        (sum, item) => sum + item.amount, 0
+    );
+
+    // Общая сумма расходов, включая накопления.
+    const totalExpenses = expenses.reduce(
+        (sum, item) => sum + item.amount, 0
+    );
+
+    // Остаток после всех учтённых расходов.
+    const balance = totalIncome - totalExpenses;
+
+    // Сумма, направленная в накопления.
+    const savings = expenses
+        .filter(item => item.category === "Накопления")
+        .reduce((sum, item) => sum + item.amount, 0);
+
+    // Сумма платежей по кредитам.
+    const credits = expenses
+        .filter(item => item.category === "Кредиты")
+        .reduce((sum, item) => sum + item.amount, 0);
+
+    // Обязательные расходы.
+    const mandatoryExpenses = expenses
+        .filter(item => item.expenseType === "Обязательный")
+        .reduce((sum, item) => sum + item.amount, 0);
+
+    // Переменные расходы.
+    const variableExpenses = expenses
+        .filter(item => item.expenseType === "Переменный")
+        .reduce((sum, item) => sum + item.amount, 0);
+
+    // Норма сбережений рассчитывается от общего дохода.
+    const savingsRate = totalIncome > 0
+        ? savings / totalIncome * 100
+        : 0;
+
+    // Доля всех расходов в доходе.
+    const expenseRatio = totalIncome > 0
+        ? totalExpenses / totalIncome * 100
+        : 0;
+
+    // Доля обязательных расходов в доходе.
+    const mandatoryRatio = totalIncome > 0
+        ? mandatoryExpenses / totalIncome * 100
+        : 0;
+
+    // Доля кредитных платежей в доходе.
+    const creditRatio = totalIncome > 0
+        ? credits / totalIncome * 100
+        : 0;
+
+    return {
+        totalIncome,
+        totalExpenses,
+        balance,
+        savings,
+        credits,
+        mandatoryExpenses,
+        variableExpenses,
+        savingsRate,
+        expenseRatio,
+        mandatoryRatio,
+        creditRatio
+    };
+}
+
+
+/* =========================================================
+   9. ОТОБРАЖЕНИЕ СПИСКА ДОХОДОВ
+   ========================================================= */
+
+function renderIncomes() {
+    const tbody = el("incomeTable");
+    tbody.replaceChildren();
+
+    if (incomes.length === 0) {
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+
+        td.colSpan = 4;
+        td.className = "empty-state";
+        td.textContent = "Доходы пока не добавлены.";
+
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+    }
+
+    incomes.forEach(item => {
+        const tr = document.createElement("tr");
+
+        tr.appendChild(makeTextCell(item.name));
+        tr.appendChild(makeTextCell(item.person));
+        tr.appendChild(
+            makeTextCell(formatMoney(item.amount), "amount income-text")
+        );
+        tr.appendChild(
+            makeDeleteButton(
+                () => deleteIncome(item.id),
+                "Удалить доход: " + item.name
+            )
+        );
+
+        tbody.appendChild(tr);
+    });
+}
+
+
+/* =========================================================
+   10. ОТОБРАЖЕНИЕ СПИСКА РАСХОДОВ
+   ========================================================= */
+
+function renderExpenses() {
+    const tbody = el("expenseTable");
+    tbody.replaceChildren();
+
+    if (expenses.length === 0) {
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+
+        td.colSpan = 4;
+        td.className = "empty-state";
+        td.textContent = "Расходы пока не добавлены.";
+
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+    }
+
+    expenses.forEach(item => {
+        const tr = document.createElement("tr");
+
+        tr.appendChild(makeTextCell(item.name));
+        tr.appendChild(makeTextCell(item.category));
+        tr.appendChild(
+            makeTextCell(formatMoney(item.amount), "amount expense-text")
+        );
+        tr.appendChild(
+            makeDeleteButton(
+                () => deleteExpense(item.id),
+                "Удалить расход: " + item.name
+            )
+        );
+
+        tbody.appendChild(tr);
+    });
+}
+
+
+/* =========================================================
+   11. ОБНОВЛЕНИЕ КАРТОЧЕК И ПОКАЗАТЕЛЕЙ
+   ========================================================= */
+
+function renderSummary(stats) {
+    el("totalIncome").textContent =
+        formatMoney(stats.totalIncome);
+
+    el("totalExpenses").textContent =
+        formatMoney(stats.totalExpenses);
+
+    el("balance").textContent =
+        formatMoney(stats.balance);
+
+    el("balance").style.color =
+        stats.balance < 0 ? "var(--red)" : "var(--green)";
+
+    el("savingsRate").textContent =
+        formatPercent(stats.savingsRate);
+
+    el("expenseRatio").textContent =
+        formatPercent(stats.expenseRatio);
+
+    el("mandatoryRatio").textContent =
+        formatPercent(stats.mandatoryRatio);
+
+    el("savingsAmount").textContent =
+        formatMoney(stats.savings);
+
+    el("creditAmount").textContent =
+        formatMoney(stats.credits);
+
+    setProgress("expenseBar", stats.expenseRatio);
+    setProgress("mandatoryBar", stats.mandatoryRatio);
+    setProgress("savingsBar", stats.savingsRate);
+    setProgress("creditBar", stats.creditRatio);
+}
+
+
+/* =========================================================
+   12. АНАЛИЗ КАТЕГОРИЙ РАСХОДОВ
+   ========================================================= */
+
+function renderCategories() {
+    const container = el("categoryAnalysis");
+    container.replaceChildren();
+
+    const totals = {};
+
+    expenses.forEach(item => {
+        totals[item.category] =
+            (totals[item.category] || 0) + item.amount;
+    });
+
+    const categories = Object.entries(totals)
+        .sort((a, b) => b[1] - a[1]);
+
+    const total = expenses.reduce(
+        (sum, item) => sum + item.amount, 0
+    );
+
+    if (categories.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty-state";
+        empty.textContent = "Добавьте расходы для анализа.";
+        container.appendChild(empty);
+        return;
+    }
+
+    categories.forEach(([name, amount], index) => {
+        const share = total > 0 ? amount / total * 100 : 0;
+
+        const item = document.createElement("div");
+        item.className = "category-item";
+
+        const heading = document.createElement("div");
+        heading.className = "category-heading";
+
+        const categoryName = document.createElement("span");
+        categoryName.textContent = name;
+
+        const categoryAmount = document.createElement("span");
+        categoryAmount.textContent =
+            formatMoney(amount) + " · " + formatPercent(share);
+
+        heading.append(categoryName, categoryAmount);
+
+        const progress = document.createElement("div");
+        progress.className = "progress";
+
+        const bar = document.createElement("div");
+        bar.className = "progress-bar " +
+            (index === 0 ? "bar-blue" : "bar-green");
+
+        bar.style.width = Math.min(100, share) + "%";
+
+        progress.appendChild(bar);
+        item.append(heading, progress);
+        container.appendChild(item);
+    });
+}
+
+
+/* =========================================================
+   13. ФИНАНСОВЫЕ РЕКОМЕНДАЦИИ
+   ========================================================= */
+
+function renderRecommendations(stats) {
+    const container = el("recommendations");
+    container.replaceChildren();
+
+    const messages = [];
+
+    // Если доходов нет, оценить бюджет невозможно.
+    if (stats.totalIncome === 0 && stats.totalExpenses === 0) {
+        messages.push({
+            type: "",
+            title: "Начните с учёта.",
+            text: "Добавьте все источники дохода и основные расходы семьи."
+        });
+    } else if (stats.totalIncome === 0) {
+        messages.push({
+            type: "warning",
+            title: "Доходы не указаны.",
+            text: "Добавьте доходы, чтобы оценить финансовую нагрузку."
+        });
+    } else {
+        // Проверка дефицита.
+        if (stats.balance < 0) {
+            messages.push({
+                type: "bad",
+                title: "Бюджет дефицитный.",
+                text: "Расходы превышают доходы на " +
+                    formatMoney(Math.abs(stats.balance)) +
+                    ". Проверьте переменные расходы и обязательные платежи."
+            });
+        } else if (stats.balance === 0) {
+            messages.push({
+                type: "warning",
+                title: "Запас отсутствует.",
+                text: "Все доходы распределены. По возможности создайте резерв."
+            });
+        } else {
+            messages.push({
+                type: "good",
+                title: "Бюджет в плюсе.",
+                text: "После учтённых расходов осталось " +
+                    formatMoney(stats.balance) + "."
+            });
+        }
+
+        // Проверка расходов относительно дохода.
+        if (stats.expenseRatio > 100) {
+            messages.push({
+                type: "bad",
+                title: "Перерасход.",
+                text: "Расходы составляют " +
+                    formatPercent(stats.expenseRatio) +
+                    " дохода. Текущий уровень затрат не покрывается доходами."
+            });
+        } else if (stats.expenseRatio >= 90) {
+            messages.push({
+                type: "warning",
+                title: "Небольшой финансовый запас.",
+                text: "На все расходы уходит " +
+                    formatPercent(stats.expenseRatio) +
+                    " дохода. Незапланированные траты могут привести к дефициту."
+            });
+        }
+
+        // Проверка накоплений.
+        if (stats.savingsRate < 10 && stats.balance > 0) {
+            messages.push({
+                type: "",
+                title: "Увеличьте резерв.",
+                text: "Рассмотрите возможность направлять часть остатка " +
+                    "на накопления. Ориентир 10% — цель, а не обязательная норма."
+            });
+        } else if (stats.savingsRate >= 20) {
+            messages.push({
+                type: "good",
+                title: "Высокая доля накоплений.",
+                text: "На накопления направлено " +
+                    formatPercent(stats.savingsRate) +
+                    " дохода. Убедитесь, что учтены все обязательные платежи."
+            });
+        }
+
+        // Проверка кредитной нагрузки.
+        if (stats.creditRatio > 30) {
+            messages.push({
+                type: "warning",
+                title: "Высокая кредитная нагрузка.",
+                text: "Платежи по кредитам составляют " +
+                    formatPercent(stats.creditRatio) +
+                    " дохода. Оцените возможности снижения долговой нагрузки."
+            });
+        }
+    }
+
+    messages.forEach(message => {
+        const box = document.createElement("div");
+        box.className = "advice" +
+            (message.type ? " " + message.type : "");
+
+        const title = document.createElement("strong");
+        title.textContent = message.title;
+
+        const text = document.createElement("div");
+        text.style.marginTop = "5px";
+        text.textContent = message.text;
+
+        box.append(title, text);
+        container.appendChild(box);
+    });
+}
+
+
+/* =========================================================
+   14. РАСЧЁТ ЦЕЛИ НАКОПЛЕНИЙ
+   ========================================================= */
+
+function renderGoal() {
+    const goal = getNumber("goalAmount");
+    const months = getNumber("goalMonths");
+
+    const validGoal =
+        Number.isFinite(goal) &&
+        goal > 0 &&
+        goal <= MAX_AMOUNT;
+
+    const validMonths =
+        Number.isInteger(months) &&
+        months >= 1 &&
+        months <= 1200;
+
+    if (!validGoal || !validMonths) {
+        el("goalMonthly").textContent = "—";
+        el("goalAdvice").textContent =
+            "Укажите цель больше нуля и срок от 1 до 1200 месяцев.";
+        return;
+    }
+
+    const monthly = goal / months;
+
+    el("goalMonthly").textContent =
+        formatMoney(monthly) + "/мес.";
+
+    const stats = calculate();
+
+    if (stats.balance >= monthly) {
+        el("goalAdvice").textContent =
+            "Текущий остаток покрывает необходимый ежемесячный взнос. " +
+            "Это расчёт без учёта будущих изменений доходов и цен.";
+    } else {
+        el("goalAdvice").textContent =
+            "Для цели нужно дополнительно находить " +
+            formatMoney(Math.max(0, monthly - stats.balance)) +
+            " в месяц относительно текущего остатка.";
+    }
+}
+
+
+/* =========================================================
+   15. ЕДИНАЯ ФУНКЦИЯ ОБНОВЛЕНИЯ ИНТЕРФЕЙСА
+   ========================================================= */
+
+function render() {
+    const stats = calculate();
+
+    renderIncomes();
+    renderExpenses();
+    renderSummary(stats);
+    renderCategories();
+    renderRecommendations(stats);
+    renderGoal();
+
+    saveData();
+}
+
+
+/* =========================================================
+   16. ПЕРЕКЛЮЧЕНИЕ МЕСЯЦЕВ
+   ========================================================= */
+
+// При смене месяца загружается отдельный бюджет.
+// Операции разных месяцев не смешиваются.
+monthInput.addEventListener("change", function() {
+    if (!this.value) {
+        this.value = getCurrentMonth();
+    }
+
+    loadData();
+});
+
+
+/* =========================================================
+   17. ИЗМЕНЕНИЕ ЦЕЛИ НАКОПЛЕНИЙ
+   ========================================================= */
+
+el("goalAmount").addEventListener("input", renderGoal);
+el("goalMonths").addEventListener("input", renderGoal);
+
+el("goalAmount").addEventListener("change", saveData);
+el("goalMonths").addEventListener("change", saveData);
+
+
+/* =========================================================
+   18. ЗАГРУЗКА ДЕМОНСТРАЦИОННЫХ ДАННЫХ
+   ========================================================= */
+
+// Пример нужен для проверки работы калькулятора.
+// При загрузке примера текущие операции месяца заменяются.
+el("demoButton").addEventListener("click", function() {
+    const confirmed = confirm(
+        "Заменить данные текущего месяца демонстрационным примером?"
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    incomes = [
+        {
+            id: createId(),
+            name: "Зарплата",
+            amount: 90000,
+            person: "Первый член семьи"
+        },
+        {
+            id: createId(),
+            name: "Зарплата супруга",
+            amount: 110000,
+            person: "Второй член семьи"
+        },
+        {
+            id: createId(),
+            name: "Подработка",
+            amount: 10000,
+            person: "Другой источник"
+        }
+    ];
+
+    expenses = [
+        {
+            id: createId(),
+            name: "Продукты на месяц",
+            amount: 30000,
+            category: "Продукты",
+            expenseType: "Переменный"
+        },
+        {
+            id: createId(),
+            name: "Коммунальные услуги",
+            amount: 10000,
+            category: "Жильё и коммунальные услуги",
+            expenseType: "Обязательный"
+        },
+        {
+            id: createId(),
+            name: "Бензин и транспорт",
+            amount: 8000,
+            category: "Транспорт",
+            expenseType: "Переменный"
+        },
+        {
+            id: createId(),
+            name: "Платёж по кредиту",
+            amount: 15000,
+            category: "Кредиты",
+            expenseType: "Обязательный"
+        },
+        {
+            id: createId(),
+            name: "Резерв семьи",
+            amount: 20000,
+            category: "Накопления",
+            expenseType: "Переменный"
+        },
+        {
+            id: createId(),
+            name: "Связь и интернет",
+            amount: 2000,
+            category: "Связь и интернет",
+            expenseType: "Обязательный"
+        }
+    ];
+
+    el("goalAmount").value = 300000;
+    el("goalMonths").value = 12;
+
+    render();
+});
+
+
+/* =========================================================
+   19. ОЧИСТКА ДАННЫХ ТЕКУЩЕГО МЕСЯЦА
+   ========================================================= */
+
+el("clearButton").addEventListener("click", function() {
+    const confirmed = confirm(
+        "Удалить все доходы, расходы и цель накоплений за выбранный месяц?"
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    incomes = [];
+    expenses = [];
+
+    el("goalAmount").value = "";
+    el("goalMonths").value = "";
+
+    render();
+});
+
+
+/* =========================================================
+   20. ЭКСПОРТ В CSV
+   ========================================================= */
+
+// CSV можно открыть в Microsoft Excel и других табличных редакторах.
+// Для русскоязычной версии Excel используется разделитель ";".
+el("exportButton").addEventListener("click", function() {
+    const rows = [
+        ["Семейный бюджет", monthInput.value],
+        [],
+        ["ДОХОДЫ"],
+        ["Источник", "Получатель", "Сумма, RUB"]
+    ];
+
+    incomes.forEach(item => {
+        rows.push([
+            item.name,
+            item.person,
+            item.amount.toFixed(2)
+        ]);
+    });
+
+    rows.push([]);
+    rows.push(["РАСХОДЫ"]);
+    rows.push([
+        "Название",
+        "Категория",
+        "Тип расхода",
+        "Сумма, RUB"
+    ]);
+
+    expenses.forEach(item => {
+        rows.push([
+            item.name,
+            item.category,
+            item.expenseType,
+            item.amount.toFixed(2)
+        ]);
+    });
+
+    const stats = calculate();
+
+    rows.push([]);
+    rows.push(["ИТОГИ"]);
+    rows.push(["Доходы, RUB", stats.totalIncome.toFixed(2)]);
+    rows.push(["Расходы, RUB", stats.totalExpenses.toFixed(2)]);
+    rows.push(["Остаток, RUB", stats.balance.toFixed(2)]);
+    rows.push(["Накопления, RUB", stats.savings.toFixed(2)]);
+    rows.push(["Кредиты, RUB", stats.credits.toFixed(2)]);
+
+    // Экранирование полей CSV.
+    // Кавычки внутри текста удваиваются.
+    function escapeCSV(value) {
+        let text = String(value);
+
+        // Защита от исполнения формул в Excel при открытии файла.
+        // Названия, начинающиеся с формульных символов,
+        // получают ведущий апостроф.
+        if (/^[\s\u0000-\u001F]*[=+\-@]/.test(text)) {
+            text = "'" + text;
+        }
+
+        return '"' + text.replace(/"/g, '""') + '"';
+    }
+
+    const csv = "\uFEFF" + rows.map(row =>
+        row.map(escapeCSV).join(";")
+    ).join("\r\n");
+
+    const blob = new Blob([csv], {
+        type: "text/csv;charset=utf-8;"
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "semeyny-budget-" +
+        monthInput.value + ".csv";
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    URL.revokeObjectURL(url);
+});
+
+
+/* =========================================================
+   21. ПЕРВИЧНЫЙ ЗАПУСК
+   Тема переключается в js/theme.js.
+   ========================================================= */
+
+// Устанавливаем текущий месяц и загружаем его данные.
+monthInput.value = getCurrentMonth();
+loadData();
+
+</script>
+</body>
+</html>
